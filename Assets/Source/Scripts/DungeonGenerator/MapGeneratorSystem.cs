@@ -32,49 +32,59 @@ public class MapGeneratorSystem : IInitializeSystem
   {
     System.Random rng = new System.Random(seed);
 
-    Dictionary<Vector2Int, TileType> result = new Dictionary<Vector2Int, TileType>();
+    Vector2Int startNode = new Vector2Int(
+      rng.Next(mapSizes.x),
+      rng.Next(mapSizes.y)
+    );
+
+    Dictionary<Vector2Int, TileType> floors = RecursiveMazeGen(
+      new List<Vector2Int>{startNode},
+      new List<Vector2Int>(),
+      new Dictionary<Vector2Int, TileType>{ {startNode * 2, TileType.Floor} },
+      mapSizes,
+      rng
+    );
 
     IEnumerable<int> xCoords = Enumerable.Range(0, mapSizes.x * 2 - 1);
     IEnumerable<int> yCoords = Enumerable.Range(0, mapSizes.y * 2 - 1);
     foreach(int x in xCoords){
       foreach(int y in yCoords){
-        result.Add(new Vector2Int(x, y), TileType.Empty);
+        if(!floors.ContainsKey(new Vector2Int(x,y))) floors.Add(new Vector2Int(x, y), TileType.Empty);
       }
     }
 
-    List<Vector2Int> visitedNodes = new List<Vector2Int>();
-    List<Vector2Int> stack = new List<Vector2Int>();
+    return floors;
+  }
 
-    Vector2Int currentNode = new Vector2Int(
-      rng.Next(mapSizes.x),
-      rng.Next(mapSizes.y)
-    );
+  private Dictionary<Vector2Int, TileType> RecursiveMazeGen(List<Vector2Int> stack, List<Vector2Int> visitedNodes, Dictionary<Vector2Int, TileType> generated, Vector2Int mapSizes, System.Random rng)
+  {
+    if (stack.Count == 0) return generated;
 
-    stack.Add(currentNode);
+    Vector2Int currentNode = stack[stack.Count - 1];
     visitedNodes.Add(currentNode);
-    result[currentNode * 2] = TileType.Floor;
+    List<Vector2Int> neighbours = GetUnvisitedNeighbours(currentNode, visitedNodes, _settingModels.sizes);
 
-    while (stack.Count > 0)
+    if (neighbours.Count > 0)
     {
-      currentNode = stack[stack.Count - 1];
-      List<Vector2Int> neighbours = GetUnvisitedNeighbours(currentNode, visitedNodes, _settingModels.sizes);
+      Vector2Int next = neighbours.RandomItem(rng);
 
-      if (neighbours.Count > 0)
-      {
-        Vector2Int next = neighbours.RandomItem(rng);
-        stack.Add(next);
-        visitedNodes.Add(next);
-        result[next * 2] = TileType.Floor;
-
-        result[currentNode * 2 + (next - currentNode)] = TileType.Floor;
-      }
-      else
-      {
-        stack.Remove(currentNode);
-      }
+      stack.Add(next);
+      visitedNodes.Add(next);
+      generated.Add(next * 2, TileType.Floor);
+      generated.Add(currentNode + next, TileType.Floor);
+    }
+    else
+    {
+      stack.Remove(currentNode);
     }
 
-    return result;
+    return RecursiveMazeGen(
+      stack,
+      visitedNodes,
+      generated,
+      mapSizes,
+      rng
+    );
   }
 
   private List<Vector2Int> GetUnvisitedNeighbours(Vector2Int node, List<Vector2Int> visitedNodes, Vector2Int sizes)
