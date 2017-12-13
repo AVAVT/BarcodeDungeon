@@ -8,25 +8,25 @@
 //------------------------------------------------------------------------------
 public partial class GameEntity {
 
-    static readonly TileComponent tileComponent = new TileComponent();
+    public TileComponent tile { get { return (TileComponent)GetComponent(GameComponentsLookup.Tile); } }
+    public bool hasTile { get { return HasComponent(GameComponentsLookup.Tile); } }
 
-    public bool isTile {
-        get { return HasComponent(GameComponentsLookup.Tile); }
-        set {
-            if (value != isTile) {
-                var index = GameComponentsLookup.Tile;
-                if (value) {
-                    var componentPool = GetComponentPool(index);
-                    var component = componentPool.Count > 0
-                            ? componentPool.Pop()
-                            : tileComponent;
+    public void AddTile(TileType newType) {
+        var index = GameComponentsLookup.Tile;
+        var component = CreateComponent<TileComponent>(index);
+        component.type = newType;
+        AddComponent(index, component);
+    }
 
-                    AddComponent(index, component);
-                } else {
-                    RemoveComponent(index);
-                }
-            }
-        }
+    public void ReplaceTile(TileType newType) {
+        var index = GameComponentsLookup.Tile;
+        var component = CreateComponent<TileComponent>(index);
+        component.type = newType;
+        ReplaceComponent(index, component);
+    }
+
+    public void RemoveTile() {
+        RemoveComponent(GameComponentsLookup.Tile);
     }
 }
 

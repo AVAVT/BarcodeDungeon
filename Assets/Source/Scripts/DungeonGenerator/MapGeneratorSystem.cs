@@ -2,29 +2,48 @@ using Entitas;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using TKLibs;
 
 public class MapGeneratorSystem : IInitializeSystem
 {
   GameContext _context;
   DungeonSettingModels _settingModels;
-  TileModels _tileModels;
   public MapGeneratorSystem(Contexts contexts)
   {
     _context = contexts.game;
     _settingModels = _context.dungeonSettingModels.value;
-    _tileModels = _context.tileModels.value;
   }
 
   public void Initialize()
   {
     // TODO create procedural seed
-    Dictionary<Vector2Int, TileType> map = GenerateMap(_settingModels.sizes, (int)System.DateTime.Now.Ticks);
+    CreateDungeonWithSeed((int)System.DateTime.Now.Ticks);
+    // CreateDungeonWithSeed(6);
+  }
 
-    foreach (KeyValuePair<Vector2Int, TileType> kvp in map)
+  private void CreateDungeonWithSeed(int seed)
+  {
+    Dictionary<Vector2Int, TileType> map = GenerateMap(_settingModels.sizes, seed);
+
+    IEnumerable<int> xCoords = Enumerable.Range(0, _settingModels.sizes.x * 2 - 1);
+    IEnumerable<int> yCoords = Enumerable.Range(0, _settingModels.sizes.y * 2 - 1);
+    foreach (int x in xCoords)
     {
-      GameEntity tile = _context.CreateEntity();
-      tile.AddPosition(kvp.Key);
-      tile.AddSprite(kvp.Value == TileType.Empty ? _tileModels.blackTile : _tileModels.floor);
+      foreach (int y in yCoords)
+      {
+        Vector2Int coord = new Vector2Int(x, y);
+        GameEntity tile = _context.CreateEntity();
+        tile.AddPosition(coord);
+
+        if (map.ContainsKey(coord))
+        {
+          tile.AddTile(map[coord]);
+        }
+        else
+        {
+          tile.AddTile(TileType.Empty);
+        }
+      }
     }
   }
 
@@ -32,28 +51,111 @@ public class MapGeneratorSystem : IInitializeSystem
   {
     System.Random rng = new System.Random(seed);
 
-    Vector2Int startNode = new Vector2Int(
-      rng.Next(mapSizes.x),
-      rng.Next(mapSizes.y)
-    );
+    List<BoundsInt> rooms = GenerateRooms(mapSizes, rng);
 
-    Dictionary<Vector2Int, TileType> floors = RecursiveMazeGen(
-      new List<Vector2Int>{startNode},
-      new List<Vector2Int>(),
-      new Dictionary<Vector2Int, TileType>{ {startNode * 2, TileType.Floor} },
+    List<Vector2Int> visitedNodes = new List<Vector2Int>();
+    Dictionary<Vector2Int, TileType> floors = new Dictionary<Vector2Int, TileType>();
+
+    rooms.ForEach(room =>
+    {
+      foreach (int x in Enumerable.Range(room.x, room.size.x + 1))
+      {
+        foreach (int y in Enumerable.Range(room.y, room.size.y + 1))
+        {
+          visitedNodes.Add(new Vector2Int(x, y));
+        }
+      }
+
+      foreach (int x in Enumerable.Range(room.x * 2, room.size.x * 2 + 1))
+      {
+        foreach (int y in Enumerable.Range(room.y * 2, room.size.y * 2 + 1))
+        {
+          floors.Add(new Vector2Int(x, y), TileType.Floor);
+        }
+      }
+    });
+
+    List<int> slots = Enumerable.Range(0, mapSizes.x * mapSizes.y).ToList()
+      .FindAll(
+        slot => !visitedNodes.Contains(new Vector2Int(slot % mapSizes.x, slot / mapSizes.x))
+      );
+
+    int startSlot = slots.RandomItem(rng);
+    Vector2Int startNode = new Vector2Int(startSlot % mapSizes.x, startSlot / mapSizes.x);
+    floors.Add(startNode * 2, TileType.Floor);
+
+    floors = RecursiveMazeGen(
+      new List<Vector2Int> { startNode },
+      visitedNodes,
+      floors,
       mapSizes,
       rng
     );
 
-    IEnumerable<int> xCoords = Enumerable.Range(0, mapSizes.x * 2 - 1);
-    IEnumerable<int> yCoords = Enumerable.Range(0, mapSizes.y * 2 - 1);
-    foreach(int x in xCoords){
-      foreach(int y in yCoords){
-        if(!floors.ContainsKey(new Vector2Int(x,y))) floors.Add(new Vector2Int(x, y), TileType.Empty);
-      }
-    }
-
     return floors;
+  }
+
+  private List<BoundsInt> GenerateRooms(Vector2Int mapSizes, System.Random rng)
+  {
+    int maxWidth = mapSizes.x % 2 == 1 ? mapSizes.x / 2 : mapSizes.x / 2 - 1;
+    int maxHeight = mapSizes.y % 2 == 1 ? mapSizes.y / 2 : mapSizes.y / 2 - 1;
+
+    List<int> slots = Enumerable.Range(0, (mapSizes.x - 1) * (mapSizes.y - 1)).ToList();
+
+    List<BoundsInt> rooms = Enumerable.Range(0, rng.Next(8, 15)).Select(i =>
+    {
+      int slot = slots.RemoveRandom(rng);
+      return new BoundsInt(
+        slot % (mapSizes.x - 1),
+        slot / (mapSizes.x - 1),
+        0,
+        0,
+        0,
+        0
+      );
+    }).ToList();
+
+    bool allowContact = true; // allow contacting rooms only once
+    for (int i = rooms.Count - 1; i >= 0; i--)
+    {
+      BoundsInt room = rooms[i];
+      int maxPotential = GetRoomMaxPotential(mapSizes, rooms, room, 1);
+      if (!allowContact) maxPotential -= 1;
+
+      if (maxPotential < 1) rooms.Remove(room);
+      else
+      {
+        int sizeX = rng.Next(1, Mathf.Min(maxWidth, maxPotential));
+        int sizeY = rng.Next(1, Mathf.Min(maxHeight, maxPotential));
+
+        // TODO not guaranteed contact here
+        if (sizeX == maxPotential || sizeY == maxPotential) allowContact = false;
+
+        rooms[i] = new BoundsInt(
+          room.position,
+          new Vector3Int(sizeX, sizeY, 0)
+        );
+      }
+    };
+
+    return rooms;
+  }
+
+  private int GetRoomMaxPotential(Vector2Int mapSizes, List<BoundsInt> rooms, BoundsInt current, int size)
+  {
+    BoundsInt test = new BoundsInt(
+      current.position,
+      Vector3Int.one.WithZ(0) * size
+    );
+
+    if (test.max.x <= mapSizes.x && test.max.y <= mapSizes.y && rooms.All(room => room == current || !room.Intersect(test)))
+    {
+      return GetRoomMaxPotential(mapSizes, rooms, current, size + 1);
+    }
+    else
+    {
+      return size - 1;
+    }
   }
 
   private Dictionary<Vector2Int, TileType> RecursiveMazeGen(List<Vector2Int> stack, List<Vector2Int> visitedNodes, Dictionary<Vector2Int, TileType> generated, Vector2Int mapSizes, System.Random rng)

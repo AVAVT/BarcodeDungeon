@@ -11,7 +11,7 @@ public class RenderSpriteSystem : ReactiveSystem<GameEntity>
 
   protected override ICollector<GameEntity> GetTrigger(IContext<GameEntity> context)
   {
-    return context.CreateCollector(GameMatcher.Sprite);
+    return context.CreateCollector(GameMatcher.AllOf(GameMatcher.Sprite, GameMatcher.View));
   }
 
   protected override bool Filter(GameEntity entity)

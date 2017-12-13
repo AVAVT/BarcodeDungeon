@@ -1,10 +1,6 @@
 using Entitas;
 using UnityEngine;
 
-public class GridCoordinateComponent : IComponent{
-  public Vector2Int value;
-}
-
 public class PositionComponent : IComponent{
   public Vector2 value;
 }
