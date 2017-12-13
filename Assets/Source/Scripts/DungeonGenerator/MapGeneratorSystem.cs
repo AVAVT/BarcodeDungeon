@@ -56,23 +56,24 @@ public class MapGeneratorSystem : IInitializeSystem
     List<Vector2Int> visitedNodes = new List<Vector2Int>();
     Dictionary<Vector2Int, TileType> floors = new Dictionary<Vector2Int, TileType>();
 
+    List<Vector2Int> openedDoors = new List<Vector2Int>();
     rooms.ForEach(room =>
     {
-      foreach (int x in Enumerable.Range(room.x, room.size.x + 1))
-      {
-        foreach (int y in Enumerable.Range(room.y, room.size.y + 1))
-        {
-          visitedNodes.Add(new Vector2Int(x, y));
-        }
-      }
+      visitedNodes.AddRange(room.All2DPoints());
 
-      foreach (int x in Enumerable.Range(room.x * 2, room.size.x * 2 + 1))
-      {
-        foreach (int y in Enumerable.Range(room.y * 2, room.size.y * 2 + 1))
-        {
-          floors.Add(new Vector2Int(x, y), TileType.Floor);
-        }
-      }
+      BoundsInt roomOnMap = new BoundsInt(
+        room.position * 2,
+        room.size * 2
+      );
+      roomOnMap.All2DPoints().ForEach(point => {
+        floors.Add(point, TileType.Floor);
+      });
+
+      // open door
+      List<Vector2Int> doorCandidates = GetPossibleDoorForRoom(room, mapSizes);
+      Vector2Int door = doorCandidates.FindAll(item => !openedDoors.Contains(item)).RandomItem(rng);
+      floors.Add(door, TileType.Floor);
+      openedDoors.Add(door);
     });
 
     List<int> slots = Enumerable.Range(0, mapSizes.x * mapSizes.y).ToList()
@@ -93,6 +94,29 @@ public class MapGeneratorSystem : IInitializeSystem
     );
 
     return floors;
+  }
+
+  private List<Vector2Int> GetPossibleDoorForRoom(BoundsInt room, Vector2Int mapSizes){
+    List<Vector2Int> result = new List<Vector2Int>();
+    for(int x=room.min.x; x <= room.max.x; x++){
+      if(room.min.y > 0){
+        result.Add(new Vector2Int(x*2, room.min.y*2 - 1));
+      }
+      if(room.max.y < mapSizes.y - 1){
+        result.Add(new Vector2Int(x*2, room.max.y*2 + 1));
+      }
+    }
+
+    for(int y=room.min.y; y <= room.max.y; y++){
+      if(room.min.x > 0){
+        result.Add(new Vector2Int(room.min.x*2 - 1, y*2));
+      }
+      if(room.max.x < mapSizes.x - 1){
+        result.Add(new Vector2Int(room.max.x*2 + 1, y*2));
+      }
+    }
+
+    return result;
   }
 
   private List<BoundsInt> GenerateRooms(Vector2Int mapSizes, System.Random rng)
