@@ -5,17 +5,19 @@ using System.Linq;
 using TKLibs;
 using Entitas.Unity;
 
-public class MapGeneratorSystem : ReactiveSystem<GameEntity>, IInitializeSystem
+public class MapGeneratorSystem : ReactiveSystem<GameEntity>
 {
   GameContext _context;
   DungeonSettingModels _settingModels;
 
-  IGroup<GameEntity> _tiles;
+  IGroup<GameEntity> _activeTiles;
+  IGroup<GameEntity> _reusableTiles;
   public MapGeneratorSystem(Contexts contexts) : base(contexts.game)
   {
     _context = contexts.game;
     _settingModels = _context.dungeonSettingModels.value;
-    _tiles = _context.GetGroup(GameMatcher.Tile);
+    _activeTiles = _context.GetGroup(GameMatcher.AllOf(GameMatcher.Tile, GameMatcher.Poolable).NoneOf(GameMatcher.Reusable));
+    _reusableTiles = _context.GetGroup(GameMatcher.AllOf(GameMatcher.Tile, GameMatcher.Poolable, GameMatcher.Reusable));
   }
 
   public void Initialize()
@@ -45,12 +47,8 @@ public class MapGeneratorSystem : ReactiveSystem<GameEntity>, IInitializeSystem
     System.Random rng = new System.Random(seed);
     Dictionary<Vector2Int, TileType> map = MapGenerator.GenerateMap(_settingModels.sizes, rng);
     
-    GameEntity[] tiles = _tiles.GetEntities();
-    for(int i = tiles.Length - 1; i >= 0; i--){
-      GameEntity tile = tiles[i];
-      tile.view.gameObject.Unlink();
-      GameObject.Destroy(tile.view.gameObject);
-      tile.Destroy();
+    foreach(GameEntity tile in _activeTiles){
+      tile.isReusable = true;
     }
 
     _context.ReplaceDungeon(
@@ -66,16 +64,19 @@ public class MapGeneratorSystem : ReactiveSystem<GameEntity>, IInitializeSystem
       foreach (int y in yCoords)
       {
         Vector2Int coord = new Vector2Int(x, y);
-        GameEntity tile = _context.CreateEntity();
-        tile.AddPosition(coord);
+
+        GameEntity tile = _reusableTiles.count > 0 ? _reusableTiles.First() : _context.CreateEntity();
+        tile.ReplacePosition(coord);
+        tile.isPoolable = true;
+        tile.isReusable = false;
 
         if (_context.dungeon.map.ContainsKey(coord))
         {
-          tile.AddTile(_context.dungeon.map[coord]);
+          tile.ReplaceTile(_context.dungeon.map[coord]);
         }
         else
         {
-          tile.AddTile(TileType.Empty);
+          tile.ReplaceTile(TileType.Empty);
         }
       }
     }

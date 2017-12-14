@@ -14,13 +14,15 @@ public static class GameComponentsLookup {
     public const int GridCoordinate = 3;
     public const int Player = 4;
     public const int PlayerModel = 5;
-    public const int Position = 6;
-    public const int Sprite = 7;
-    public const int Tile = 8;
-    public const int TileModels = 9;
-    public const int View = 10;
+    public const int Poolable = 6;
+    public const int Position = 7;
+    public const int Reusable = 8;
+    public const int Sprite = 9;
+    public const int Tile = 10;
+    public const int TileModels = 11;
+    public const int View = 12;
 
-    public const int TotalComponents = 11;
+    public const int TotalComponents = 13;
 
     public static readonly string[] componentNames = {
         "Dungeon",
@@ -29,7 +31,9 @@ public static class GameComponentsLookup {
         "GridCoordinate",
         "Player",
         "PlayerModel",
+        "Poolable",
         "Position",
+        "Reusable",
         "Sprite",
         "Tile",
         "TileModels",
@@ -43,7 +47,9 @@ public static class GameComponentsLookup {
         typeof(GridCoordinateComponent),
         typeof(PlayerComponent),
         typeof(PlayerModelComponent),
+        typeof(Poolable),
         typeof(PositionComponent),
+        typeof(Reusable),
         typeof(SpriteComponent),
         typeof(TileComponent),
         typeof(TileModelsComponent),

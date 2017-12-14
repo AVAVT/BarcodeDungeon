@@ -27,6 +27,7 @@ public class GameController : MonoBehaviour
   {
     return new Feature("Systems")
         .Add(new CoreSystems(contexts))
+        .Add(new ObjectPoolingSystems(contexts))
         .Add(new MovementSystems(contexts))
         .Add(new TilemapSystems(contexts))
         .Add(new DungeonGeneratorSystems(contexts))
