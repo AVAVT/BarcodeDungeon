@@ -8,15 +8,18 @@
 //------------------------------------------------------------------------------
 public static class InputComponentsLookup {
 
-    public const int Command = 0;
+    public const int BarcodeScannerModel = 0;
+    public const int Command = 1;
 
-    public const int TotalComponents = 1;
+    public const int TotalComponents = 2;
 
     public static readonly string[] componentNames = {
+        "BarcodeScannerModel",
         "Command"
     };
 
     public static readonly System.Type[] componentTypes = {
+        typeof(BarcodeScannerModelComponent),
         typeof(CommandComponent)
     };
 }

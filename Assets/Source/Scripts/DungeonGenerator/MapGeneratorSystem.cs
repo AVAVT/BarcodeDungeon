@@ -21,7 +21,7 @@ public class MapGeneratorSystem : ReactiveSystem<GameEntity>, IInitializeSystem
   public void Initialize()
   {
     // TODO create procedural seed
-    _context.SetGenerator((int)System.DateTime.Now.Ticks);
+    // _context.SetGenerator((int)System.DateTime.Now.Ticks);
     // _context.SetGenerator(6);
   }
 

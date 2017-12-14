@@ -6,6 +6,7 @@ public class GameController : MonoBehaviour
   public TileModels tileModels;
   public DungeonSettingModels dungeonSettingModels;
   public PlayerModel playerModel;
+  public BarcodeScannerModel barcodeScannerModel;
   private Systems _systems;
   private Contexts _contexts;
 
@@ -37,7 +38,8 @@ public class GameController : MonoBehaviour
     contexts.game.SetTileModels(tileModels);
     contexts.game.SetDungeonSettingModels(dungeonSettingModels);
     contexts.game.SetPlayerModel(playerModel);
-
+    contexts.input.SetBarcodeScannerModel(barcodeScannerModel);
+    
     return contexts;
   }
 }

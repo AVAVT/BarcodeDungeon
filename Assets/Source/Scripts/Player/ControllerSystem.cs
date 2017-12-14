@@ -1,27 +1,31 @@
 using Entitas;
 using UnityEngine;
+using Lean.Touch;
 
-
-public class ControllerSystem : IExecuteSystem
+public class ControllerSystem : IInitializeSystem
 {
   InputContext _context;
-  public ControllerSystem(Contexts contexts){
+  public ControllerSystem(Contexts contexts)
+  {
     _context = contexts.input;
   }
-
-  public void Execute()
+  public void Initialize()
   {
-    if(Input.GetKeyDown(KeyCode.W)){
-      _context.ReplaceCommand(Vector2Int.up);
-    }
-    else if(Input.GetKeyDown(KeyCode.A)){
-      _context.ReplaceCommand(Vector2Int.left);
-    }
-    else if(Input.GetKeyDown(KeyCode.S)){
-      _context.ReplaceCommand(Vector2Int.down);
-    }
-    else if(Input.GetKeyDown(KeyCode.D)){
-      _context.ReplaceCommand(Vector2Int.right);
+    Lean.Touch.LeanTouch.OnFingerSwipe += OnFingerSwipe;
+  }
+
+  void OnFingerSwipe(LeanFinger finger)
+  {
+    if (finger.SwipeScreenDelta.magnitude > 10)
+    {
+      if (Mathf.Abs(finger.SwipeScreenDelta.x) > Mathf.Abs(finger.SwipeScreenDelta.y))
+      {
+        _context.ReplaceCommand(Vector2Int.right * (int)Mathf.Sign(finger.SwipeScreenDelta.x));
+      }
+      else
+      {
+        _context.ReplaceCommand(Vector2Int.up * (int)Mathf.Sign(finger.SwipeScreenDelta.y));
+      }
     }
   }
 }
