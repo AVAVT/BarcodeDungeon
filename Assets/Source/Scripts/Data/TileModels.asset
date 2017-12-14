@@ -24,5 +24,5 @@ MonoBehaviour:
   wallBottomLeft: {fileID: 21300020, guid: 0acdf3cfa094248f1a50cdffedb74a95, type: 3}
   wallBottomRight: {fileID: 21300022, guid: 0acdf3cfa094248f1a50cdffedb74a95, type: 3}
   wallBottomT: {fileID: 21300024, guid: 0acdf3cfa094248f1a50cdffedb74a95, type: 3}
-  blackTile: {fileID: 21300032, guid: 20e20be942e534db5aff6e2a55642348, type: 3}
-  floor: {fileID: 21300038, guid: 20e20be942e534db5aff6e2a55642348, type: 3}
+  blackTile: {fileID: 21300006, guid: 0acdf3cfa094248f1a50cdffedb74a95, type: 3}
+  floor: {fileID: 21300046, guid: 20e20be942e534db5aff6e2a55642348, type: 3}

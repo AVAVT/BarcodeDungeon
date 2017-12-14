@@ -5,6 +5,7 @@ public class GameController : MonoBehaviour
 {
   public TileModels tileModels;
   public DungeonSettingModels dungeonSettingModels;
+  public PlayerModel playerModel;
   private Systems _systems;
   private Contexts _contexts;
 
@@ -25,14 +26,17 @@ public class GameController : MonoBehaviour
   {
     return new Feature("Systems")
         .Add(new CoreSystems(contexts))
+        .Add(new MovementSystems(contexts))
         .Add(new TilemapSystems(contexts))
-        .Add(new DungeonGeneratorSystems(contexts));
+        .Add(new DungeonGeneratorSystems(contexts))
+        .Add(new PlayerSystems(contexts));
   }
 
   private Contexts SetContextsData(Contexts contexts)
   {
     contexts.game.SetTileModels(tileModels);
     contexts.game.SetDungeonSettingModels(dungeonSettingModels);
+    contexts.game.SetPlayerModel(playerModel);
 
     return contexts;
   }
