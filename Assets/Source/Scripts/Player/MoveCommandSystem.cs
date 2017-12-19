@@ -14,6 +14,8 @@ public class MoveCommandSystem : ReactiveSystem<InputEntity>{
 
     if(IsValidMove(_gameContext.dungeon.map, _gameContext.playerEntity.gridCoordinate.value + direction)){
       _gameContext.playerEntity.ReplaceGridCoordinate(_gameContext.playerEntity.gridCoordinate.value + direction);
+			//TODO: Change to Enemy Turn. End Player Turn
+			_gameContext.playerEntity.isMoveCompleted = true;
     }
   }
 
@@ -23,7 +25,7 @@ public class MoveCommandSystem : ReactiveSystem<InputEntity>{
 
   protected override bool Filter(InputEntity entity)
   {
-    return entity.hasCommand && _gameContext.isPlayer;
+		return entity.hasCommand && _gameContext.isPlayer && !_gameContext.playerEntity.isMoveCompleted;
   }
 
   protected override ICollector<InputEntity> GetTrigger(IContext<InputEntity> context)

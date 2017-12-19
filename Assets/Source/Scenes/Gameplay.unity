@@ -143,6 +143,7 @@ MonoBehaviour:
   dungeonSettingModels: {fileID: 11400000, guid: 4212d9e3c8e7046f7909143825dea798,
     type: 2}
   playerModel: {fileID: 11400000, guid: fe092f3f1834b496482cc93f7ac61c8b, type: 2}
+  enemyModel: {fileID: 11400000, guid: b2b1751b54b043e4a9a0da1b0a858152, type: 2}
   barcodeScannerModel: {fileID: 11400000, guid: 3603747e6318b47b19c2e6e4b96b18ba,
     type: 2}
 --- !u!4 &240574718
@@ -212,7 +213,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 13.895833
+  orthographic size: 13.218749
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

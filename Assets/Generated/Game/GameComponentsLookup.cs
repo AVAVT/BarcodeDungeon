@@ -10,25 +10,34 @@ public static class GameComponentsLookup {
 
     public const int Dungeon = 0;
     public const int DungeonSettingModels = 1;
-    public const int Generator = 2;
-    public const int GridCoordinate = 3;
-    public const int Player = 4;
-    public const int PlayerModel = 5;
-    public const int Poolable = 6;
-    public const int Position = 7;
-    public const int Reusable = 8;
-    public const int Sprite = 9;
-    public const int Tile = 10;
-    public const int TileModels = 11;
-    public const int View = 12;
+    public const int Enemy = 2;
+    public const int EnemyModel = 3;
+    public const int Generator = 4;
+    public const int GridCoordinate = 5;
+    public const int Moveable = 6;
+    public const int MoveCompleted = 7;
+    public const int Player = 8;
+    public const int PlayerModel = 9;
+    public const int Poolable = 10;
+    public const int Position = 11;
+    public const int Reusable = 12;
+    public const int Sprite = 13;
+    public const int Tile = 14;
+    public const int TileModels = 15;
+    public const int Turn = 16;
+    public const int View = 17;
 
-    public const int TotalComponents = 13;
+    public const int TotalComponents = 18;
 
     public static readonly string[] componentNames = {
         "Dungeon",
         "DungeonSettingModels",
+        "Enemy",
+        "EnemyModel",
         "Generator",
         "GridCoordinate",
+        "Moveable",
+        "MoveCompleted",
         "Player",
         "PlayerModel",
         "Poolable",
@@ -37,14 +46,19 @@ public static class GameComponentsLookup {
         "Sprite",
         "Tile",
         "TileModels",
+        "Turn",
         "View"
     };
 
     public static readonly System.Type[] componentTypes = {
         typeof(DungeonComponent),
         typeof(DungeonSettingModelsComponent),
+        typeof(EnemyComponent),
+        typeof(EnemyModelComponent),
         typeof(GeneratorComponent),
         typeof(GridCoordinateComponent),
+        typeof(MoveableComponent),
+        typeof(MoveCompletedComponent),
         typeof(PlayerComponent),
         typeof(PlayerModelComponent),
         typeof(Poolable),
@@ -53,6 +67,7 @@ public static class GameComponentsLookup {
         typeof(SpriteComponent),
         typeof(TileComponent),
         typeof(TileModelsComponent),
+        typeof(TurnComponent),
         typeof(ViewComponent)
     };
 }
