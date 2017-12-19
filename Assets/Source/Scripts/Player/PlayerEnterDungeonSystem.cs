@@ -21,7 +21,8 @@ public class PlayerEnterDungeonSystem : ReactiveSystem<GameEntity>
     if(!_context.isPlayer){
       _context.isPlayer = true;
       GameObject playerObject = GameObject.Instantiate<GameObject>(_context.playerModel.value.prefab);
-      _context.playerEntity.AddView(playerObject);
+      _context.playerEntity.AddView(playerObject);  
+			_context.playerEntity.isMoveable = true;
       playerObject.Link(_context.playerEntity, _context);
       Camera.main.GetComponent<Camera2DFollow>().target = playerObject.transform;
     }
