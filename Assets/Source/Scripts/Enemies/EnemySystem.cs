@@ -3,5 +3,6 @@
 public class EnemySystems : Feature {
 	public EnemySystems(Contexts contexts): base("Enemy System"){
 		Add (new EnemySpawnSystem (contexts));
+		Add (new EnemyAISystem (contexts));
 	}
 }

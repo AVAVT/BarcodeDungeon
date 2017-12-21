@@ -47,7 +47,7 @@ public class MapGeneratorSystem : ReactiveSystem<GameEntity>
     System.Random rng = new System.Random(seed);
     Dictionary<Vector2Int, TileType> map = MapGenerator.GenerateMap(_settingModels.sizes, rng);
     
-    foreach(GameEntity tile in _activeTiles){
+    foreach(GameEntity tile in _activeTiles.GetEntities()){
       tile.isReusable = true;
     }
 
