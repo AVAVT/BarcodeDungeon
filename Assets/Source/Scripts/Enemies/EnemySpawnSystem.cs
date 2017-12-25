@@ -44,6 +44,9 @@ public class EnemySpawnSystem : ReactiveSystem<GameEntity>, IInitializeSystem
 		for (int i = 0; i < enemiesNumber; i++) {			
 			GameEntity enemyEntity = _context.CreateEntity ();
 			GameObject enemyObject = GameObject.Instantiate (_context.enemyModel.value.prefab);
+			enemyEntity.isEnemy = true;
+			enemyEntity.isMoveCompleted = true;
+			enemyEntity.isMoveable = true;
 			enemyEntity.AddView (enemyObject);
 			enemyObject.Link (enemyEntity, _context);
 			enemyEntity.isMoveable = true;
@@ -67,7 +70,6 @@ public class EnemySpawnSystem : ReactiveSystem<GameEntity>, IInitializeSystem
 			rng = new System.Random (generatorGroup.GetSingleEntity ().generator.seed+200);
 			coordinate = RandomSpawnPosition (map, rng);
 		}
-		Debug.Log (coordinate);
 		return coordinate;
 	}
 		
